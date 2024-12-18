@@ -31,12 +31,12 @@ extension UINavigationController {
 			let resistance: Double = 800
 			let maxSpeed: Double = 1.2
 			let nominalSpeed = max(0.7, velocity / resistance)
-			let speed = min(nominalSpeed, maxSpeed) * 0.6
+			let speed = min(nominalSpeed, maxSpeed)
 			if velocity > 675 || (percent >= 0.5 && velocity > -200) {
-				delegate.interactionController?.completionSpeed = speed
+				delegate.interactionController?.completionSpeed = speed * 0.8
 				delegate.interactionController?.finish()
 			} else {
-				delegate.interactionController?.completionSpeed = speed
+				delegate.interactionController?.completionSpeed = speed * 0.6
 				delegate.interactionController?.cancel()
 			}
 			
