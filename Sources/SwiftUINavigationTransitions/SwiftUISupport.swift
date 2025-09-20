@@ -1,4 +1,5 @@
-import SwiftUI
+public import UIKitNavigationTransitions
+public import SwiftUI
 @_spi(Advanced) import SwiftUIIntrospect
 
 extension View {

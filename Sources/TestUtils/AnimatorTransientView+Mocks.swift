@@ -1,6 +1,6 @@
-@testable import Animator
+@testable public import Animator
+import IssueReporting
 import UIKit
-import XCTestDynamicOverlay
 
 extension AnimatorTransientView {
 	public static var unimplemented: AnimatorTransientView {
@@ -9,50 +9,50 @@ extension AnimatorTransientView {
 }
 
 final class UnimplementedAnimatorTransientView: AnimatorTransientView {
-	override public var initial: AnimatorTransientView.Properties {
+	override var initial: AnimatorTransientView.Properties {
 		get {
-			XCTFail("\(Self.self).\(#function) is unimplemented")
+			reportIssue("\(Self.self).\(#function) is unimplemented")
 			return .noop
 		}
 		set {
-			XCTFail("\(Self.self).\(#function) is unimplemented")
+			reportIssue("\(Self.self).\(#function) is unimplemented")
 		}
 	}
 
-	override public var animation: AnimatorTransientView.Properties {
+	override var animation: AnimatorTransientView.Properties {
 		get {
-			XCTFail("\(Self.self).\(#function) is unimplemented")
+			reportIssue("\(Self.self).\(#function) is unimplemented")
 			return .noop
 		}
 		set {
-			XCTFail("\(Self.self).\(#function) is unimplemented")
+			reportIssue("\(Self.self).\(#function) is unimplemented")
 		}
 	}
 
-	override public var completion: AnimatorTransientView.Properties {
+	override var completion: AnimatorTransientView.Properties {
 		get {
-			XCTFail("\(Self.self).\(#function) is unimplemented")
+			reportIssue("\(Self.self).\(#function) is unimplemented")
 			return .noop
 		}
 		set {
-			XCTFail("\(Self.self).\(#function) is unimplemented")
+			reportIssue("\(Self.self).\(#function) is unimplemented")
 		}
 	}
 
-	override public subscript<T>(dynamicMember keyPath: KeyPath<UIView, T>) -> T {
-		XCTFail("\(Self.self).\(#function) is unimplemented")
+	override subscript<T>(dynamicMember keyPath: KeyPath<UIView, T>) -> T {
+		reportIssue("\(Self.self).\(#function) is unimplemented")
 		return uiView[keyPath: keyPath]
 	}
 
-	public init() {
+	init() {
 		super.init(UIView())
 	}
 
-	override public func setUIViewProperties(
+	override func setUIViewProperties(
 		to properties: KeyPath<AnimatorTransientView, AnimatorTransientView.Properties>,
 		force: Bool
 	) {
-		XCTFail("\(Self.self).\(#function) is unimplemented")
+		reportIssue("\(Self.self).\(#function) is unimplemented")
 	}
 }
 

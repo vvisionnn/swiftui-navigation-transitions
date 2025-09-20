@@ -1,0 +1,32 @@
+{
+  "configurations" : [
+    {
+      "id" : "8C608A98-3C43-44EC-9508-ECA482696F28",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false,
+    "testExecutionOrdering" : "random"
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "AnimatorTests",
+        "name" : "AnimatorTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "AtomicTransitionTests",
+        "name" : "AtomicTransitionTests"
+      }
+    }
+  ],
+  "version" : 1
+}

@@ -16,8 +16,9 @@ concurrency:
 
 jobs:
   macOS:
+    if: github.event_name != 'pull_request' || !contains(github.event.pull_request.title, '[skip ci]')
     name: ${{ matrix.platform }} (Swift ${{ matrix.swift }})
-    runs-on: macos-14
+    runs-on: macos-15
     strategy:
       fail-fast: false
       matrix:
@@ -26,24 +27,45 @@ jobs:
           - mac-catalyst
           - tvOS
         swift:
-          - "5.9"
-          - "5.10"
+          - "6.0" # Xcode 16.2
+          - "6.1" # Xcode 16.4
+          - "6.2" # Xcode 26.0
     steps:
       - name: Git Checkout
         uses: actions/checkout@v4
 
+      - name: Disable Macro Fingerprint Validation
+        run: |
+          defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
+          defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
+
+      - name: Select Xcode version
+        uses: mxcl/xcodebuild@v3
+        with:
+          swift: ~${{ matrix.swift }}
+          action: none
+
+      - name: List Runtimes
+        run: xcrun simctl list runtimes
+
+      - if: matrix.platform != 'mac-catalyst'
+        name: Download Required Runtimes
+        run: xcodebuild -downloadPlatform ${{ matrix.platform }}
+
       - name: Test Library
-        uses: mxcl/xcodebuild@v2
+        uses: mxcl/xcodebuild@v3
         with:
           platform: ${{ matrix.platform }}
           swift: ~${{ matrix.swift }}
           action: test
-          scheme: NavigationTransitions
+          workspace: SwiftUINavigationTransitions.xcworkspace
+          scheme: SwiftUINavigationTransitions
 
       - name: Build Examples/Demo
-        uses: mxcl/xcodebuild@v2
+        uses: mxcl/xcodebuild@v3
         with:
           platform: ${{ matrix.platform }}
           swift: ~${{ matrix.swift }}
           action: build
+          workspace: SwiftUINavigationTransitions.xcworkspace
           scheme: Demo
