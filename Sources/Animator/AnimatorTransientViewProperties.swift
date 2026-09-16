@@ -1,7 +1,7 @@
 public import UIKit
 
 /// Defines the allowed mutable properties in a transient view throughout each stage of the transition.
-public struct AnimatorTransientViewProperties: Equatable {
+public struct AnimatorTransientViewProperties: Equatable, Sendable {
 	/// A proxy for `UIView.alpha`.
 	@OptionalWithDefault
 	public var alpha: CGFloat
@@ -19,17 +19,19 @@ extension AnimatorTransientViewProperties {
 	static let `default` = Self(
 		alpha: 1,
 		transform: .identity,
-		zPosition: 0
+		zPosition: 0,
 	)
 
+	@MainActor
 	init(of uiView: UIView) {
 		self.init(
 			alpha: uiView.alpha,
 			transform: .init(uiView.transform3D),
-			zPosition: uiView.layer.zPosition
+			zPosition: uiView.layer.zPosition,
 		)
 	}
 
+	@MainActor
 	func assignToUIView(_ uiView: UIView, force: Bool) {
 		$alpha.assign(to: uiView, \.alpha, force: force)
 		$transform.assign(to: uiView, force: force)

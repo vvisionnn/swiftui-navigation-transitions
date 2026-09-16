@@ -34,11 +34,12 @@ public protocol NavigationTransitionProtocol {
 	///   - operation: The ``TransitionOperation``. Possible values are `push` or `pop`. It's recommended that you
 	///   customize the behavior of your transition based on this parameter.
 	///   - container: The raw `UIView` containing the transitioning views.
+	@MainActor
 	func transition(
 		from fromView: TransientView,
 		to toView: TransientView,
 		for operation: TransitionOperation,
-		in container: Container
+		in container: Container,
 	)
 
 	/// The content of a navigation transition that is composed from other transitions.
@@ -57,11 +58,12 @@ public protocol NavigationTransitionProtocol {
 extension NavigationTransitionProtocol where Body: NavigationTransitionProtocol {
 	/// Invokes ``body``'s implementation of ``transition(from:to:for:in:)-211yh``.
 	@inlinable
+	@MainActor
 	public func transition(
 		from fromView: TransientView,
 		to toView: TransientView,
 		for operation: TransitionOperation,
-		in container: Container
+		in container: Container,
 	) {
 		self.body.transition(from: fromView, to: toView, for: operation, in: container)
 	}
@@ -77,7 +79,7 @@ extension NavigationTransitionProtocol where Body == Never {
 			"""
 			'\(Self.self)' has no body. …
 			Do not access a transition's 'body' property directly, as it may not exist.
-			"""
+			""",
 		)
 	}
 }

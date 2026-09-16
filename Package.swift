@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 
 import PackageDescription
 
@@ -43,6 +43,9 @@ let package = Package(
 			.product(name: "ObjCRuntimeTools", package: "objc-runtime-tools"),
 			.product(name: "Once", package: "swift-once-macro"),
 		]),
+		.testTarget(name: "UIKitNavigationTransitionsTests", dependencies: [
+			"UIKitNavigationTransitions",
+		]),
 
 		.target(name: "SwiftUINavigationTransitions", dependencies: [
 			"UIKitNavigationTransitions",
@@ -55,7 +58,6 @@ let package = Package(
 			"SwiftUINavigationTransitions",
 		]),
 	],
-	swiftLanguageModes: [.v5]
 )
 
 // MARK: Dependencies
@@ -65,13 +67,17 @@ package.dependencies = [
 	.package(url: "https://github.com/davdroman/swift-once-macro", from: "1.0.0"),
 	.package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.0.0"), // dev
 	.package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.0.0"),
-	.package(url: "https://github.com/siteline/swiftui-introspect", "1.3.0"..<"27.0.0"),
+	.package(url: "https://github.com/siteline/swiftui-introspect", "26.0.0"..<"28.0.0-beta"),
 ]
 
 for target in package.targets {
 	target.swiftSettings = target.swiftSettings ?? []
 	target.swiftSettings? += [
 		.enableUpcomingFeature("ExistentialAny"),
+		.enableUpcomingFeature("ImmutableWeakCaptures"),
+		.enableUpcomingFeature("InferIsolatedConformances"),
 		.enableUpcomingFeature("InternalImportsByDefault"),
+		.enableUpcomingFeature("MemberImportVisibility"),
+		.enableUpcomingFeature("NonisolatedNonsendingByDefault"),
 	]
 }

@@ -4,7 +4,7 @@ import ObjCRuntimeTools
 import Once
 public import UIKit
 
-public struct UISplitViewControllerColumns: OptionSet {
+public struct UISplitViewControllerColumns: OptionSet, Sendable {
 	public static let primary = Self(rawValue: 1)
 	public static let supplementary = Self(rawValue: 1 << 1)
 	public static let secondary = Self(rawValue: 1 << 2)
@@ -22,9 +22,9 @@ public struct UISplitViewControllerColumns: OptionSet {
 
 extension UISplitViewController {
 	public func setNavigationTransition(
-		_ transition: AnyNavigationTransition,
+		_ transition: CustomNavigationTransition,
 		forColumns columns: UISplitViewControllerColumns,
-		interactivity: AnyNavigationTransition.Interactivity = .default
+		interactivity: CustomNavigationTransition.Interactivity = .default,
 	) {
 		if columns.contains(.compact), let compact = compactViewController as? UINavigationController {
 			compact.setNavigationTransition(transition, interactivity: interactivity)
@@ -117,8 +117,8 @@ extension UINavigationController {
 	}
 
 	public func setNavigationTransition(
-		_ transition: AnyNavigationTransition,
-		interactivity: AnyNavigationTransition.Interactivity = .default
+		_ transition: CustomNavigationTransition,
+		interactivity: CustomNavigationTransition.Interactivity = .default,
 	) {
 		do {
 			try UINavigationController.swizzle()
@@ -137,15 +137,17 @@ extension UINavigationController {
 		}
 
 		#if !os(tvOS) && !os(visionOS)
-		if defaultEdgePanRecognizer.strongDelegate == nil {
-			defaultEdgePanRecognizer.strongDelegate = NavigationGestureRecognizerDelegate(controller: self)
-		}
+		if #unavailable(iOS 26, macCatalyst 26) {
+			if defaultEdgePanRecognizer.strongDelegate == nil {
+				defaultEdgePanRecognizer.strongDelegate = NavigationGestureRecognizerDelegate(controller: self)
+			}
 
-		if defaultPanRecognizer == nil {
-			defaultPanRecognizer = UIPanGestureRecognizer()
-			defaultPanRecognizer.targets = defaultEdgePanRecognizer.targets // https://stackoverflow.com/a/60526328/1922543
-			defaultPanRecognizer.strongDelegate = NavigationGestureRecognizerDelegate(controller: self)
-			view.addGestureRecognizer(defaultPanRecognizer)
+			if defaultPanRecognizer == nil {
+				defaultPanRecognizer = UIPanGestureRecognizer()
+				defaultPanRecognizer.targets = defaultEdgePanRecognizer.targets // https://stackoverflow.com/a/60526328/1922543
+				defaultPanRecognizer.strongDelegate = NavigationGestureRecognizerDelegate(controller: self)
+				view.addGestureRecognizer(defaultPanRecognizer)
+			}
 		}
 
 		if edgePanRecognizer == nil {
@@ -166,20 +168,27 @@ extension UINavigationController {
 		if transition.isDefault {
 			switch interactivity {
 			case .disabled:
-				exclusivelyEnableGestureRecognizer(.none)
+				exclusivelyEnableGestureRecognizers([])
 			case .edgePan:
-				exclusivelyEnableGestureRecognizer(defaultEdgePanRecognizer)
-			case .pan:
-				exclusivelyEnableGestureRecognizer(defaultPanRecognizer)
+				exclusivelyEnableGestureRecognizers([defaultEdgePanRecognizer])
+			case .contentPan:
+				if #available(iOS 26, macCatalyst 26, *) {
+					exclusivelyEnableGestureRecognizers([
+						defaultEdgePanRecognizer,
+						interactiveContentPopGestureRecognizer,
+					].compactMap { $0 })
+				} else {
+					exclusivelyEnableGestureRecognizers([defaultPanRecognizer])
+				}
 			}
 		} else {
 			switch interactivity {
 			case .disabled:
-				exclusivelyEnableGestureRecognizer(.none)
+				exclusivelyEnableGestureRecognizers([])
 			case .edgePan:
-				exclusivelyEnableGestureRecognizer(edgePanRecognizer)
-			case .pan:
-				exclusivelyEnableGestureRecognizer(panRecognizer)
+				exclusivelyEnableGestureRecognizers([edgePanRecognizer])
+			case .contentPan:
+				exclusivelyEnableGestureRecognizers([panRecognizer])
 			}
 		}
 		#endif
@@ -189,7 +198,7 @@ extension UINavigationController {
 		try #once {
 			try #swizzle(
 				UINavigationController.setViewControllers,
-				params: [UIViewController].self, Bool.self
+				params: [UIViewController].self, Bool.self,
 			) { $self, viewControllers, animated in
 				if let transitionDelegate = self.customDelegate {
 					self.setViewControllers(viewControllers, animated: transitionDelegate.transition.animation != nil)
@@ -200,7 +209,7 @@ extension UINavigationController {
 
 			try #swizzle(
 				UINavigationController.pushViewController,
-				params: UIViewController.self, Bool.self
+				params: UIViewController.self, Bool.self,
 			) { $self, viewController, animated in
 				if let transitionDelegate = self.customDelegate {
 					self.pushViewController(viewController, animated: transitionDelegate.transition.animation != nil)
@@ -212,7 +221,7 @@ extension UINavigationController {
 			try #swizzle(
 				UINavigationController.popViewController,
 				params: Bool.self,
-				returning: UIViewController?.self
+				returning: UIViewController?.self,
 			) { $self, animated in
 				if let transitionDelegate = self.customDelegate {
 					self.popViewController(animated: transitionDelegate.transition.animation != nil)
@@ -224,7 +233,7 @@ extension UINavigationController {
 			try #swizzle(
 				UINavigationController.popToViewController,
 				params: UIViewController.self, Bool.self,
-				returning: [UIViewController]?.self
+				returning: [UIViewController]?.self,
 			) { $self, viewController, animated in
 				if let transitionDelegate = self.customDelegate {
 					self.popToViewController(viewController, animated: transitionDelegate.transition.animation != nil)
@@ -236,7 +245,7 @@ extension UINavigationController {
 			try #swizzle(
 				UINavigationController.popToRootViewController,
 				params: Bool.self,
-				returning: [UIViewController]?.self
+				returning: [UIViewController]?.self,
 			) { $self, animated in
 				if let transitionDelegate = self.customDelegate {
 					self.popToRootViewController(animated: transitionDelegate.transition.animation != nil)
@@ -249,13 +258,22 @@ extension UINavigationController {
 
 	@available(tvOS, unavailable)
 	@available(visionOS, unavailable)
-	private func exclusivelyEnableGestureRecognizer(_ gestureRecognizer: UIPanGestureRecognizer?) {
-		for recognizer in [defaultEdgePanRecognizer!, defaultPanRecognizer!, edgePanRecognizer!, panRecognizer!] {
-			if let gestureRecognizer, recognizer === gestureRecognizer {
-				recognizer.isEnabled = true
-			} else {
-				recognizer.isEnabled = false
+	private func exclusivelyEnableGestureRecognizers(_ enabledGestureRecognizers: [UIGestureRecognizer]) {
+		var gestureRecognizers: [UIGestureRecognizer] = [
+			defaultEdgePanRecognizer,
+			defaultPanRecognizer,
+			edgePanRecognizer,
+			panRecognizer,
+		].compactMap { $0 }
+
+		if #available(iOS 26, macCatalyst 26, *) {
+			if let interactiveContentPopGestureRecognizer {
+				gestureRecognizers.append(interactiveContentPopGestureRecognizer)
 			}
+		}
+
+		for gestureRecognizer in gestureRecognizers {
+			gestureRecognizer.isEnabled = enabledGestureRecognizers.contains { gestureRecognizer === $0 }
 		}
 	}
 }

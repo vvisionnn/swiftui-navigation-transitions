@@ -36,7 +36,7 @@ public struct _OptionalTransition<Transition: NavigationTransitionProtocol>: Nav
 		from fromView: TransientView,
 		to toView: TransientView,
 		for operation: TransitionOperation,
-		in container: Container
+		in container: Container,
 	) {
 		transition?.transition(from: fromView, to: toView, for: operation, in: container)
 	}
@@ -58,12 +58,12 @@ public struct _ConditionalTransition<TrueTransition: NavigationTransitionProtoco
 		from fromView: TransientView,
 		to toView: TransientView,
 		for operation: TransitionOperation,
-		in container: Container
+		in container: Container,
 	) {
 		switch transition {
-		case .left(let trueTransition):
+		case let .left(trueTransition):
 			trueTransition.transition(from: fromView, to: toView, for: operation, in: container)
-		case .right(let falseTransition):
+		case let .right(falseTransition):
 			falseTransition.transition(from: fromView, to: toView, for: operation, in: container)
 		}
 	}

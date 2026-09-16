@@ -1,4 +1,4 @@
-extension AnyNavigationTransition {
+extension CustomNavigationTransition {
 	/// The system-default transition.
 	///
 	/// Use this transition if you wish to modify the interactivity of the transition without altering the
@@ -8,10 +8,11 @@ extension AnyNavigationTransition {
 	///   NavigationStack {
 	///     // ...
 	///   }
-	///   .navigationStackTransition(.default, interactivity: .pan) // enables full-screen panning for system-provided pop
+	///   .customNavigationTransition(.default, interactivity: .disabled) // disables swipe back gesture
 	///   ```
 	///
 	/// - Note: The animation for `default` cannot be customized via ``animation(_:)``.
+	@MainActor
 	public static var `default`: Self {
 		.init(Default())
 	}

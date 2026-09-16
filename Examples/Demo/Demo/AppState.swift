@@ -42,7 +42,8 @@ final class AppState: ObservableObject {
 			}
 		}
 
-		func callAsFunction() -> AnyNavigationTransition {
+		@MainActor
+		func callAsFunction() -> CustomNavigationTransition {
 			switch self {
 			case .default:
 				.default
@@ -89,11 +90,12 @@ final class AppState: ObservableObject {
 			}
 		}
 
+		@MainActor
 		func callAsFunction(
 			duration: Duration,
 			stiffness: Stiffness,
-			damping: Damping
-		) -> AnyNavigationTransition.Animation? {
+			damping: Damping,
+		) -> CustomNavigationTransition.Animation? {
 			switch self {
 			case .none:
 				.none
@@ -199,7 +201,7 @@ final class AppState: ObservableObject {
 	enum Interactivity: CaseIterable, CustomStringConvertible, Hashable {
 		case disabled
 		case edgePan
-		case pan
+		case contentPan
 
 		var description: String {
 			switch self {
@@ -207,19 +209,19 @@ final class AppState: ObservableObject {
 				"Disabled"
 			case .edgePan:
 				"Edge Pan"
-			case .pan:
-				"Pan"
+			case .contentPan:
+				"Content Pan"
 			}
 		}
 
-		func callAsFunction() -> AnyNavigationTransition.Interactivity {
+		func callAsFunction() -> CustomNavigationTransition.Interactivity {
 			switch self {
 			case .disabled:
 				.disabled
 			case .edgePan:
 				.edgePan
-			case .pan:
-				.pan
+			case .contentPan:
+				.contentPan
 			}
 		}
 	}
@@ -231,7 +233,7 @@ final class AppState: ObservableObject {
 	@Published var stiffness: Stiffness = .low
 	@Published var damping: Damping = .veryHigh
 
-	@Published var interactivity: Interactivity = .edgePan
+	@Published var interactivity: Interactivity = .contentPan
 
 	@Published var isPresentingSettings: Bool = false
 }

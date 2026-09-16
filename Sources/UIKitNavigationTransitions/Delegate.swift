@@ -4,11 +4,11 @@ import NavigationTransition
 import UIKit
 
 final class NavigationTransitionDelegate: NSObject, UINavigationControllerDelegate {
-	var transition: AnyNavigationTransition
-	private weak var baseDelegate: (any UINavigationControllerDelegate)?
-	var interactionController: UIPercentDrivenInteractiveTransition?
+	var transition: CustomNavigationTransition
+	private weak var baseDelegate: (any UINavigationControllerDelegate)? = nil
+	var interactionController: UIPercentDrivenInteractiveTransition? = nil
 
-	init(transition: AnyNavigationTransition, baseDelegate: (any UINavigationControllerDelegate)?) {
+	init(transition: CustomNavigationTransition, baseDelegate: (any UINavigationControllerDelegate)?) {
 		self.transition = transition
 		self.baseDelegate = baseDelegate
 	}
@@ -38,7 +38,7 @@ final class NavigationTransitionDelegate: NSObject, UINavigationControllerDelega
 			NavigationTransitionAnimatorProvider(
 				transition: transition,
 				animation: animation,
-				operation: operation
+				operation: operation,
 			)
 		} else {
 			nil
@@ -47,11 +47,11 @@ final class NavigationTransitionDelegate: NSObject, UINavigationControllerDelega
 }
 
 final class NavigationTransitionAnimatorProvider: NSObject, UIViewControllerAnimatedTransitioning {
-	let transition: AnyNavigationTransition
+	let transition: CustomNavigationTransition
 	let animation: Animation
 	let operation: NavigationTransitionOperation
 
-	init(transition: AnyNavigationTransition, animation: Animation, operation: NavigationTransitionOperation) {
+	init(transition: CustomNavigationTransition, animation: Animation, operation: NavigationTransitionOperation) {
 		self.transition = transition
 		self.animation = animation
 		self.operation = operation
@@ -81,7 +81,7 @@ final class NavigationTransitionAnimatorProvider: NSObject, UIViewControllerAnim
 		}
 		let animator = UIViewPropertyAnimator(
 			duration: transitionDuration(using: transitionContext),
-			timingParameters: animation.timingParameters
+			timingParameters: animation.timingParameters,
 		)
 		cachedAnimators[ObjectIdentifier(transitionContext)] = animator
 
@@ -97,12 +97,14 @@ final class NavigationTransitionAnimatorProvider: NSObject, UIViewControllerAnim
 		toUIView.isUserInteractionEnabled = false
 
 		switch transition.handler {
-		case .transient(let handler):
-			if let (fromView, toView) = transientViews(
-				for: handler,
-				animator: animator,
-				context: (container, fromUIView, toUIView)
-			) {
+		case let .transient(handler):
+			if
+				let (fromView, toView) = transientViews(
+					for: handler,
+					animator: animator,
+					context: (container, fromUIView, toUIView),
+				)
+			{
 				for view in [fromView, toView] {
 					view.setUIViewProperties(to: \.initial)
 					animator.addAnimations { view.setUIViewProperties(to: \.animation) }
@@ -115,7 +117,7 @@ final class NavigationTransitionAnimatorProvider: NSObject, UIViewControllerAnim
 					}
 				}
 			}
-		case .primitive(let handler):
+		case let .primitive(handler):
 			handler(animator, operation, transitionContext)
 		}
 
@@ -139,9 +141,9 @@ final class NavigationTransitionAnimatorProvider: NSObject, UIViewControllerAnim
 	}
 
 	private func transientViews(
-		for handler: AnyNavigationTransition.TransientHandler,
+		for handler: CustomNavigationTransition.TransientHandler,
 		animator: any Animator,
-		context: (container: UIView, fromUIView: UIView, toUIView: UIView)
+		context: (container: UIView, fromUIView: UIView, toUIView: UIView),
 	) -> (fromView: AnimatorTransientView, toView: AnimatorTransientView)? {
 		let (container, fromUIView, toUIView) = context
 

@@ -1,6 +1,7 @@
-@testable import Animator
 import TestUtils
+@testable import Animator
 
+@MainActor
 final class AnimatorTransientViewTests: XCTestCase {}
 
 extension AnimatorTransientViewTests {
@@ -24,7 +25,7 @@ extension AnimatorTransientViewTests {
 		let expectedProperties = AnimatorTransientView.Properties(
 			alpha: 0.5,
 			transform: .init(.identity.translated(x: 50, y: 60, z: 0).scaled(4).rotated(by: .pi, x: 0, y: 0, z: 1)),
-			zPosition: 15
+			zPosition: 15,
 		)
 
 		XCTAssertEqual(sut.initial, expectedProperties)

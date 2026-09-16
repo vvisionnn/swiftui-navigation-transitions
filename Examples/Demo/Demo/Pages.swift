@@ -37,12 +37,13 @@ struct PageTwo: View {
 		let content = Group {
 			Text("The library is fully compatible with **NavigationView** in iOS 13+, and the new **NavigationStack** in iOS 16.")
 			Text("In fact, that entire transition you just saw can be implemented in **one line** of SwiftUI code:")
-			Code("""
-				NavigationStack {
-				  ...
-				}
-				.navigationTransition(.slide)
+			Code(
 				"""
+				NavigationStack {
+				...
+				}
+				.customNavigationTransition(.slide)
+				""",
 			)
 		}
 
@@ -61,20 +62,22 @@ struct PageThree: View {
 		let content = Group {
 			Text("The API is designed to resemble that of built-in SwiftUI Transitions for maximum **familiarity** and **ease of use**.")
 			Text("You can apply **custom animations** just like with standard SwiftUI transitions:")
-			Code("""
-				.navigationTransition(
-				    .fade(.in).animation(
-				        .easeInOut(duration: 0.3)
-				    )
-				)
+			Code(
 				"""
+				.customNavigationTransition(
+					.fade(.in).animation(
+						.easeInOut(duration: 0.3)
+					)
+				)
+				""",
 			)
 			Text("... and you can even **combine** them too:")
-			Code("""
-				.navigationTransition(
-				    .slide.combined(with: .fade(.in))
-				)
+			Code(
 				"""
+				.customNavigationTransition(
+					.slide.combined(with: .fade(.in))
+				)
+				""",
 			)
 		}
 

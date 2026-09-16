@@ -15,10 +15,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  macOS:
+  # TODO: Re-enable when --ifdef no-indent works as intended
+  # lint:
+  #   name: Lint
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Git Checkout
+  #       uses: actions/checkout@v5
+
+  #     - name: Install SwiftFormat
+  #       run: |
+  #         brew unlink swiftformat
+  #         brew install swiftformat --HEAD
+
+  #     - name: SwiftFormat Lint
+  #       run: swiftformat --lint . --reporter github-actions-log
+
+  apple:
     if: github.event_name != 'pull_request' || !contains(github.event.pull_request.title, '[skip ci]')
     name: ${{ matrix.platform }} (Swift ${{ matrix.swift }})
-    runs-on: macos-15
+    runs-on: macos-26
     strategy:
       fail-fast: false
       matrix:
@@ -27,14 +43,13 @@ jobs:
           - mac-catalyst
           - tvOS
         swift:
-          - "6.0" # Xcode 16.2
-          - "6.1" # Xcode 16.4
-          - "6.2" # Xcode 26.0
+          - "6.2"
+          - "6.3"
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Disable Macro Fingerprint Validation
+      - name: Allow Macros
         run: |
           defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
           defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
@@ -44,15 +59,21 @@ jobs:
         with:
           swift: ~${{ matrix.swift }}
           action: none
+          verbosity: xcbeautify
 
-      - name: List Runtimes
-        run: xcrun simctl list runtimes
+      - if: ${{ matrix.platform != 'mac-catalyst' }}
+        name: Initialize Simulator Service
+        run: xcrun simctl list
 
-      - if: matrix.platform != 'mac-catalyst'
-        name: Download Required Runtimes
-        run: xcodebuild -downloadPlatform ${{ matrix.platform }}
+      - if: ${{ matrix.platform != 'mac-catalyst' }}
+        name: Download Default Runtime
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 15
+          max_attempts: 3
+          command: xcodebuild -downloadPlatform ${{ matrix.platform }}
 
-      - name: Test Library
+      - name: Run Tests
         uses: mxcl/xcodebuild@v3
         with:
           platform: ${{ matrix.platform }}
@@ -60,8 +81,9 @@ jobs:
           action: test
           workspace: SwiftUINavigationTransitions.xcworkspace
           scheme: SwiftUINavigationTransitions
+          verbosity: xcbeautify
 
-      - name: Build Examples/Demo
+      - name: Build Demo
         uses: mxcl/xcodebuild@v3
         with:
           platform: ${{ matrix.platform }}
@@ -69,3 +91,4 @@ jobs:
           action: build
           workspace: SwiftUINavigationTransitions.xcworkspace
           scheme: Demo
+          verbosity: xcbeautify

@@ -1,5 +1,6 @@
 # SwiftUINavigationTransitions
 
+[![](https://img.shields.io/badge/Documentation-gray?logo=googledocs&logoColor=white)](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/main/documentation/swiftuinavigationtransitions)
 [![CI](https://github.com/davdroman/swiftui-navigation-transitions/actions/workflows/ci.yml/badge.svg)](https://github.com/davdroman/swiftui-navigation-transitions/actions/workflows/ci.yml)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdavdroman%2Fswiftui-navigation-transitions%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdavdroman%2Fswiftui-navigation-transitions%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions)
@@ -26,7 +27,7 @@ NavigationView {
   // ...
 }
 .navigationViewStyle(.stack)
-.navigationTransition(.slide)
+.customNavigationTransition(.slide)
 ```
 
 #### iOS 16+
@@ -35,7 +36,7 @@ NavigationView {
 NavigationStack {
   // ...
 }
-.navigationTransition(.slide)
+.customNavigationTransition(.slide)
 ```
 
 ---
@@ -45,7 +46,7 @@ The API is designed to resemble that of built-in SwiftUI Transitions for maximum
 You can apply **custom animations** just like with standard SwiftUI transitions:
 
 ```swift
-.navigationTransition(
+.customNavigationTransition(
     .fade(.in).animation(.easeInOut(duration: 0.3))
 )
 ```
@@ -53,7 +54,7 @@ You can apply **custom animations** just like with standard SwiftUI transitions:
 You can **combine** them:
 
 ```swift
-.navigationTransition(
+.customNavigationTransition(
     .slide.combined(with: .fade(.in))
 )
 ```
@@ -61,7 +62,7 @@ You can **combine** them:
 And you can **dynamically** choose between transitions based on logic:
 
 ```swift
-.navigationTransition(
+.customNavigationTransition(
     reduceMotion ? .fade(.in).animation(.linear) : .slide(.vertical)
 )
 ```
@@ -74,7 +75,7 @@ The library ships with some **standard transitions** out of the box:
 - [`fade(_:)`](Sources/NavigationTransition/Fade.swift)
 - [`slide(axis:)`](Sources/NavigationTransition/Slide.swift)
 
-In addition to these, you can create fully [**custom transitions**](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/main/documentation/navigationtransitions/custom-transitions) in just a few lines of SwiftUI-like code!
+In addition to these, you can create fully [**custom transitions**](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/main/documentation/swiftuinavigationtransitions/custom-transitions) in just a few lines of SwiftUI-like code!
 
 ```swift
 struct Swing: NavigationTransitionProtocol {
@@ -103,16 +104,22 @@ The [**Demo**](Examples/Demo) app showcases some of these transitions in action.
 
 ### Interactivity
 
-A sweet additional feature is the ability to override the behavior of the **pop gesture** on the navigation view:
+Choose from three interactivity options: `.disabled`, `.edgePan`, or `.contentPan`:
 
 ```swift
-.navigationTransition(.slide, interactivity: .pan) // full-pan screen gestures!
+.customNavigationTransition(.slide, interactivity: .disabled) // disables back swipes
 ```
 
-This even works to override its behavior while maintaining the **default system transition** in iOS:
+`.contentPan` back-deploys iOS 26 full-screen **pop gestures** all the way to iOS 13:
 
 ```swift
-.navigationTransition(.default, interactivity: .pan) // ✨
+.customNavigationTransition(.slide, interactivity: .contentPan) // works on iOS 13-26!
+```
+
+This also works while maintaining the **default system transition**:
+
+```swift
+.customNavigationTransition(.default, interactivity: .contentPan) // works on iOS 13-26!
 ```
 
 ## Installation
@@ -121,38 +128,10 @@ Add the package via Swift Package Manager:
 
 ``` swift
 dependencies: [
-    .package(url: "https://github.com/davdroman/swiftui-navigation-transitions", from: "0.16.0"),
+    .package(url: "https://github.com/davdroman/swiftui-navigation-transitions", from: "0.19.0"),
 ]
 ```
 
 ```swift
 .product(name: "SwiftUINavigationTransitions", package: "swiftui-navigation-transitions"),
 ```
-
-## Documentation
-
-The documentation for releases and `main` are available here:
-
-- [`main`](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/main/documentation/swiftuinavigationtransitions)
-- [0.16.0](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.16.0/documentation/swiftuinavigationtransitions)
-
-<details>
-<summary>
-Other versions
-</summary>
-
-- [0.15.1](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.15.1/documentation/swiftuinavigationtransitions)
-- [0.9.3](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.9.3/documentation/navigationtransitions)
-- [0.9.2](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.9.2/documentation/navigationtransitions)
-- [0.9.1](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.9.1/documentation/navigationtransitions)
-- [0.9.0](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.9.0/documentation/navigationtransitions)
-- [0.8.1](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.8.1/documentation/navigationtransitions)
-- [0.8.0](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.8.0/documentation/navigationtransitions)
-- [0.7.4](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.7.4/documentation/navigationtransitions)
-- [0.7.3](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.7.3/documentation/navigationtransitions)
-- [0.7.2](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.7.2/documentation/navigationtransitions)
-- [0.7.1](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.7.1/documentation/navigationtransitions)
-- [0.7.0](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.7.0/documentation/navigationtransitions)
-- [0.6.0](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.6.0/documentation/navigationtransitions)
-- [0.5.1](https://swiftpackageindex.com/davdroman/swiftui-navigation-transitions/0.5.1/documentation/navigationtransitions)
-</details>

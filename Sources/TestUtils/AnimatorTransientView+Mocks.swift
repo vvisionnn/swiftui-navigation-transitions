@@ -3,6 +3,7 @@ import IssueReporting
 import UIKit
 
 extension AnimatorTransientView {
+	@MainActor
 	public static var unimplemented: AnimatorTransientView {
 		UnimplementedAnimatorTransientView()
 	}
@@ -39,18 +40,21 @@ final class UnimplementedAnimatorTransientView: AnimatorTransientView {
 		}
 	}
 
+	@MainActor
 	override subscript<T>(dynamicMember keyPath: KeyPath<UIView, T>) -> T {
 		reportIssue("\(Self.self).\(#function) is unimplemented")
 		return uiView[keyPath: keyPath]
 	}
 
+	@MainActor
 	init() {
 		super.init(UIView())
 	}
 
+	@MainActor
 	override func setUIViewProperties(
 		to properties: KeyPath<AnimatorTransientView, AnimatorTransientView.Properties>,
-		force: Bool
+		force: Bool,
 	) {
 		reportIssue("\(Self.self).\(#function) is unimplemented")
 	}
@@ -60,6 +64,6 @@ extension AnimatorTransientView.Properties {
 	fileprivate static let noop = Self(
 		alpha: 0,
 		transform: .init(.init()),
-		zPosition: 0
+		zPosition: 0,
 	)
 }

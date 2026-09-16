@@ -1,6 +1,7 @@
-@testable import Animator
 import TestUtils
+@testable import Animator
 
+@MainActor
 final class AnimatorTransientViewPropertiesTests: XCTestCase {}
 
 extension AnimatorTransientViewPropertiesTests {

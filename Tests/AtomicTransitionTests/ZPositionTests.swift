@@ -1,13 +1,14 @@
-@testable import Animator
 import AtomicTransition
 import TestUtils
+@testable import Animator
 
+@MainActor
 final class ZPositionTests: XCTestCase {
 	let viewUsed = AnimatorTransientView(UIView())
 	let properties = AnimatorTransientViewProperties(
 		alpha: 1,
 		transform: .identity,
-		zPosition: 0
+		zPosition: 0,
 	)
 	let containerUsed = UIView()
 
@@ -42,13 +43,14 @@ final class ZPositionTests: XCTestCase {
 	}
 }
 
+@MainActor
 final class BringToFrontAndSendToBackTests: XCTestCase {
 	let uiViewUsed = UIView()
 	lazy var viewUsed = AnimatorTransientView(uiViewUsed)
 	let properties = AnimatorTransientViewProperties(
 		alpha: 1,
 		transform: .identity,
-		zPosition: 0
+		zPosition: 0,
 	)
 	let anotherUIViewA = UIView()
 	let anotherUIViewB = UIView()
